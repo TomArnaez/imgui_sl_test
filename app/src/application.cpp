@@ -333,7 +333,6 @@ void application::record(frame &f, uint32_t img_idx) {
   f.cmd.reset({});
   f.cmd.begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 
-  // ── PRESENT_SRC -> COLOR_ATTACHMENT_OPTIMAL ─────────────
   vk::ImageMemoryBarrier2 pre{};
   pre.setSrcStageMask(vk::PipelineStageFlagBits2::eNone)
       .setSrcAccessMask(vk::AccessFlagBits2::eNone)
@@ -345,7 +344,6 @@ void application::record(frame &f, uint32_t img_idx) {
       .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
   f.cmd.pipelineBarrier2(vk::DependencyInfo{}.setImageMemoryBarriers(pre));
 
-  // ── Dynamic Rendering begin ─────────────────────────────
   const vk::RenderingAttachmentInfo color =
       vk::RenderingAttachmentInfo{}
           .setImageView(*swapchain_views_[img_idx])
@@ -363,7 +361,6 @@ void application::record(frame &f, uint32_t img_idx) {
   ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), f.cmd);
   f.cmd.endRendering();
 
-  // ── COLOR_ATTACHMENT_OPTIMAL -> PRESENT_SRC ────────────
   vk::ImageMemoryBarrier2 post{};
   post.setSrcStageMask(vk::PipelineStageFlagBits2::eColorAttachmentOutput)
       .setSrcAccessMask(vk::AccessFlagBits2::eColorAttachmentWrite)

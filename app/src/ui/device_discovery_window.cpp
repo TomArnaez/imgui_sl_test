@@ -2,10 +2,13 @@
 
 #include <algorithm>
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <nfd.h>
 
-device_discovery_window::device_discovery_window(device_manager& device_manager)
-  : device_manager_(device_manager) {}
+#include <util.hpp>
+
+device_discovery_window::device_discovery_window(device_manager &device_manager)
+    : device_manager_(device_manager) {}
 
 void device_discovery_window::render() {
   if (ImGui::Begin("Device Discovery")) {
@@ -38,7 +41,33 @@ void device_discovery_window::render() {
     if (ImGui::BeginTable("Devices", 3,
                           ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
       ImGui::TableSetupColumn("Interface");
+      ImGui::TableSetupColumn("ID");
       ImGui::TableHeadersRow();
+
+      for (auto &discovered_device : device_manager_.get_discovered_devices()) {
+        ImGui::TableNextRow();
+
+        // Interface
+        ImGui::TableNextColumn();
+        switch (discovered_device.descriptor.device_interface) {
+        case SL_DEVICE_INTERFACE_GEV:
+          ImGui::Text("GigE");
+          break;
+        default:
+          ImGui::Text("Unknown");
+        }
+
+        ImGui::TableNextColumn();
+        switch (discovered_device.descriptor.device_interface) {
+        case SL_DEVICE_INTERFACE_GEV: {
+          std::string ip_str = util::format_ip_address(discovered_device.descriptor.gev_descriptor.device_ip_address);
+          ImGui::Text(ip_str.c_str());
+          break;
+        }
+        default:
+          ImGui::Text("Unknown");
+        }
+      }
 
       ImGui::EndTable();
     }

@@ -19,4 +19,9 @@ void log_and_throw(
   throw std::runtime_error(std::move(msg));
 }
 
+inline std::string format_ip_address(uint32_t ip) {
+  return std::format("{}.{}.{}.{}", (ip >> 24) & 0xFF, (ip >> 16) & 0xFF,
+                     (ip >> 8) & 0xFF, ip & 0xFF);
+}
+
 } // namespace util
