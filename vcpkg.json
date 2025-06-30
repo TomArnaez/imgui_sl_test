@@ -1,0 +1,19 @@
+{
+  "name": "myproject",
+  "version-string": "0.1.0",
+  "dependencies": [
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "vulkan-binding",
+        "docking-experimental"
+      ]
+    },
+    "gtest",
+    "nativefiledialog-extended",
+    "shader-slang",
+    "spdlog",
+    "vulkan-memory-allocator"
+  ]
+}
