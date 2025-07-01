@@ -9,9 +9,9 @@ struct tree_node {
     std::string_view meta_info;
 };
 
-class feature_list_view {
+class feature_list_window {
 public:
-    feature_list_view();
+    feature_list_window();
     void render();
 private:
     void render_tree(const tree_node& node);

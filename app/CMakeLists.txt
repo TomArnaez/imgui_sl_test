@@ -3,7 +3,7 @@ add_executable(app
     src/application.cpp
     src/device_manager.cpp
     src/ui/device_discovery_window.cpp
-    src/ui/feature_list_view.cpp
+    src/ui/feature_list_window.cpp
     src/ui/gev_device_control_window.cpp
     )
 

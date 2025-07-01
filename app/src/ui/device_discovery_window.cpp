@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <imgui.h>
 #include <imgui_stdlib.h>
-#include <nfd.h>
 
 #include <util.hpp>
 
@@ -14,6 +13,7 @@ void device_discovery_window::render() {
   if (ImGui::Begin("Device Discovery")) {
     if (ImGui::Button("Discover Devices")) {
       discovery_error_message_.clear();
+      selected_device_idx_ = std::nullopt;
 
       auto result = device_manager_.discover_devices(discovery_timeout_ms_);
       if (!result)
@@ -21,55 +21,66 @@ void device_discovery_window::render() {
     }
 
     ImGui::SameLine();
-
     ImGui::PushItemWidth(120.0f);
     if (ImGui::InputScalar("Discovery Timeout (ms)", ImGuiDataType_U32,
                            &discovery_timeout_ms_))
       discovery_timeout_ms_ = std::clamp(discovery_timeout_ms_, 50u, 1000u);
-
     ImGui::PopItemWidth();
-
     ImGui::Separator();
 
     if (!discovery_error_message_.empty()) {
       ImVec4 error_color = ImVec4(1.0f, 0.2f, 0.2f, 1.0f);
-      ImGui::TextColored(error_color, "Error: %s",
+      ImGui::TextColored(error_color, "Discovery Error: %s",
                          discovery_error_message_.c_str());
       ImGui::Separator();
     }
 
-    if (ImGui::BeginTable("Devices", 3,
-                          ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+    if (ImGui::BeginTable("Devices", 2,
+                          ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
+                              ImGuiTableFlags_SizingFixedFit)) {
       ImGui::TableSetupColumn("Interface");
       ImGui::TableSetupColumn("ID");
       ImGui::TableHeadersRow();
 
-      for (auto &discovered_device : device_manager_.get_discovered_devices()) {
-        ImGui::TableNextRow();
+      const auto &discovered_devices = device_manager_.get_discovered_devices();
+      for (int i = 0; i < discovered_devices.size(); ++i) {
+        const auto &discovered_device = discovered_devices[i];
 
-        // Interface
+        ImGui::TableNextRow();
         ImGui::TableNextColumn();
+
+        const char *interface_text = "Unknown";
+        std::string id_text = "Unknown";
+
         switch (discovered_device.descriptor.device_interface) {
         case SL_DEVICE_INTERFACE_GEV:
-          ImGui::Text("GigE");
+          interface_text = "GigE";
+          id_text = util::format_ip_address(
+              discovered_device.descriptor.gev_descriptor.device_ip_address);
           break;
-        default:
-          ImGui::Text("Unknown");
+        }
+
+        const bool is_selected = (i == *selected_device_idx_);
+        if (ImGui::Selectable(interface_text, is_selected,
+                              ImGuiSelectableFlags_SpanAllColumns)) {
+          selected_device_idx_ = i;
         }
 
         ImGui::TableNextColumn();
-        switch (discovered_device.descriptor.device_interface) {
-        case SL_DEVICE_INTERFACE_GEV: {
-          std::string ip_str = util::format_ip_address(discovered_device.descriptor.gev_descriptor.device_ip_address);
-          ImGui::Text(ip_str.c_str());
-          break;
-        }
-        default:
-          ImGui::Text("Unknown");
+        ImGui::TextUnformatted(id_text.c_str());
+      }
+      ImGui::EndTable();
+    }
+
+    ImGui::Separator();
+
+    if (selected_device_idx_) {
+      if (ImGui::Button("Connect")) {
+        const auto &devices = device_manager_.get_discovered_devices();
+        if (*selected_device_idx_ < devices.size()) {
+          const auto &selected_device = devices[*selected_device_idx_];
         }
       }
-
-      ImGui::EndTable();
     }
   }
 

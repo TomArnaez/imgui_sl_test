@@ -1,4 +1,4 @@
-#include "feature_list_view.hpp"
+#include "feature_list_window.hpp"
 
 #include <imgui.h>
 #include <string_view>
@@ -26,11 +26,11 @@ tree_node create_dummy_tree() {
 
 } // namespace
 
-feature_list_view::feature_list_view()
+feature_list_window::feature_list_window()
     : root(create_dummy_tree()) {
 }
 
-void feature_list_view::render_tree(const tree_node &node) {
+void feature_list_window::render_tree(const tree_node &node) {
   ImGuiTreeNodeFlags flags =
       node.children.empty() ? ImGuiTreeNodeFlags_Leaf : 0;
 
@@ -45,7 +45,7 @@ void feature_list_view::render_tree(const tree_node &node) {
   }
 }
 
-void feature_list_view::render() {
+void feature_list_window::render() {
   ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar |
                                   ImGuiWindowFlags_AlwaysVerticalScrollbar;
   ImGui::Begin("Scrollable Feature List", nullptr, window_flags);
